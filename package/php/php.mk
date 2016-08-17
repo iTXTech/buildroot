@@ -76,6 +76,10 @@ else
 PHP_CONF_ENV += ac_cv_func_dlopen=no ac_cv_lib_dl_dlopen=no
 endif
 
+ifeq ($(BR2_PACKAGE_PHP_ZTS),y)
+PHP_CONF_OPTS += --enable-maintainer-zts
+PHP_EXTRA_LIBS += -lpthread
+endif
 PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_CLI),,--disable-cli)
 PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_CGI),,--disable-cgi)
 PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_FPM),--enable-fpm,--disable-fpm)
