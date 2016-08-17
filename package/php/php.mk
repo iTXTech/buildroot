@@ -285,6 +285,29 @@ PHP_CONF_OPTS += \
 PHP_DEPENDENCIES += jpeg libpng freetype
 endif
 
+# PECL
+ifeq ($(BR2_PACKAGE_PHP_EXT_YAML),y)
+PHP_YAML_VERSION = 2.0.0RC8
+PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/yaml-$(PHP_YAML_VERSION).tgz
+PHP_CONF_OPTS += --with-yaml=$(STAGING_DIR)/usr
+PHP_DEPENDENCIES += libyaml
+PHP_PRE_CONFIGURE_HOOKS += tar -xvf $(BR2_DL_DIR)/yaml-$(PHP_YAML_VERSION).tgz -C $(@D)/yaml --strip-components=1
+endif
+
+ifeq ($(BR2_PACKAGE_PHP_EXT_PTHREADS),y)
+PHP_PTHREADS_VERSION = 3.1.6
+PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/pthreads-$(PHP_PTHREADS_VERSION).tgz
+PHP_CONF_OPTS += --with-pthreads
+PHP_PRE_CONFIGURE_HOOKS += tar -xvf $(BR2_DL_DIR)/pthreads-$(PHP_PTHREADS_VERSION).tgz -C $(@D)/pthreads --strip-components=1
+endif
+
+ifeq ($(BR2_PACKAGE_PHP_EXT_WEAKREF),y)
+PHP_WEAKREF_VERSION = 0.3.2
+PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/Weakref-$(PHP_WEAKREF_VERSION).tgz
+PHP_CONF_OPTS += --with-Weakref
+PHP_PRE_CONFIGURE_HOOKS += tar -xvf $(BR2_DL_DIR)/Weakref-$(PHP_WEAKREF_VERSION).tgz -C $(@D)/Weakref --strip-components=1
+endif
+
 ifeq ($(BR2_PACKAGE_PHP_FPM),y)
 define PHP_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 0755 $(@D)/sapi/fpm/init.d.php-fpm \
