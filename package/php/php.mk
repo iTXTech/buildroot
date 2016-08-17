@@ -291,21 +291,33 @@ PHP_YAML_VERSION = 2.0.0RC8
 PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/yaml-$(PHP_YAML_VERSION).tgz
 PHP_CONF_OPTS += --with-yaml=$(STAGING_DIR)/usr
 PHP_DEPENDENCIES += libyaml
-PHP_PRE_CONFIGURE_HOOKS := tar -xvf $(BR2_DL_DIR)/yaml-$(PHP_YAML_VERSION).tgz -C $(@D)/yaml --strip-components=1 $(PHP_PRE_CONFIGURE_HOOKS)
+define YAML_UNPACK
+mkdir -p $(@D)/ext/yaml
+tar -xvf $(BR2_DL_DIR)/yaml-$(PHP_YAML_VERSION).tgz -C $(@D)/ext/yaml --strip-components=1
+endef
+PHP_PRE_CONFIGURE_HOOKS := YAML_UNPACK $(PHP_PRE_CONFIGURE_HOOKS)
 endif
 
 ifeq ($(BR2_PACKAGE_PHP_EXT_PTHREADS),y)
 PHP_PTHREADS_VERSION = 3.1.6
 PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/pthreads-$(PHP_PTHREADS_VERSION).tgz
-PHP_CONF_OPTS += --with-pthreads
-PHP_PRE_CONFIGURE_HOOKS := tar -xvf $(BR2_DL_DIR)/pthreads-$(PHP_PTHREADS_VERSION).tgz -C $(@D)/pthreads --strip-components=1 $(PHP_PRE_CONFIGURE_HOOKS)
+PHP_CONF_OPTS += --enable-pthreads
+define PTHREADS_UNPACK
+mkdir -p $(@D)/ext/pthreads
+tar -xvf $(BR2_DL_DIR)/pthreads-$(PHP_PTHREADS_VERSION).tgz -C $(@D)/ext/pthreads --strip-components=1
+endef
+PHP_PRE_CONFIGURE_HOOKS := PTHREADS_UNPACK $(PHP_PRE_CONFIGURE_HOOKS)
 endif
 
 ifeq ($(BR2_PACKAGE_PHP_EXT_WEAKREF),y)
 PHP_WEAKREF_VERSION = 0.3.2
 PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/Weakref-$(PHP_WEAKREF_VERSION).tgz
-PHP_CONF_OPTS += --with-Weakref
-PHP_PRE_CONFIGURE_HOOKS := tar -xvf $(BR2_DL_DIR)/Weakref-$(PHP_WEAKREF_VERSION).tgz -C $(@D)/Weakref --strip-components=1 $(PHP_PRE_CONFIGURE_HOOKS)
+PHP_CONF_OPTS += --enable-Weakref
+define WEAKREF_UNPACK
+mkdir -p $(@D)/ext/Weakref
+tar -xvf $(BR2_DL_DIR)/Weakref-$(PHP_WEAKREF_VERSION).tgz -C $(@D)/ext/Weakref --strip-components=1
+endef
+PHP_PRE_CONFIGURE_HOOKS := WEAKREF_UNPACK $(PHP_PRE_CONFIGURE_HOOKS)
 endif
 
 ifeq ($(BR2_PACKAGE_PHP_FPM),y)
