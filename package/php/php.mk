@@ -312,7 +312,7 @@ endif
 ifeq ($(BR2_PACKAGE_PHP_EXT_WEAKREF),y)
 PHP_WEAKREF_VERSION = 0.3.2
 PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/Weakref-$(PHP_WEAKREF_VERSION).tgz
-PHP_CONF_OPTS += --enable-Weakref
+PHP_CONF_OPTS += --enable-weakref
 define WEAKREF_UNPACK
 mkdir -p $(@D)/ext/Weakref
 tar -xvf $(BR2_DL_DIR)/Weakref-$(PHP_WEAKREF_VERSION).tgz -C $(@D)/ext/Weakref --strip-components=1
