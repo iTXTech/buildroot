@@ -291,7 +291,7 @@ endif
 
 # PECL
 ifeq ($(BR2_PACKAGE_PHP_EXT_YAML),y)
-PHP_YAML_VERSION = 2.0.0RC8
+PHP_YAML_VERSION = 2.0.0
 PHP_EXTRA_DOWNLOADS += https://pecl.php.net/get/yaml-$(PHP_YAML_VERSION).tgz
 PHP_CONF_OPTS += --with-yaml=$(STAGING_DIR)/usr
 PHP_DEPENDENCIES += libyaml
