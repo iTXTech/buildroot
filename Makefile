@@ -24,29 +24,69 @@
 # You shouldn't need to mess with anything beyond this point...
 #--------------------------------------------------------------
 
+# Delete default rules. We don't use them. This saves a bit of time.
+.SUFFIXES:
+
 # we want bash as shell
 SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	 else if [ -x /bin/bash ]; then echo /bin/bash; \
 	 else echo sh; fi; fi)
 
-# Trick for always running with a fixed umask
-UMASK = 0022
-ifneq ($(shell umask),$(UMASK))
+# Set O variable if not already done on the command line;
+# or avoid confusing packages that can use the O=<dir> syntax for out-of-tree
+# build by preventing it from being forwarded to sub-make calls.
+ifneq ("$(origin O)", "command line")
+O := $(CURDIR)/output
+endif
+
+# Check if the current Buildroot execution meets all the pre-requisites.
+# If they are not met, Buildroot will actually do its job in a sub-make meeting
+# its pre-requisites, which are:
+#  1- Permissive enough umask:
+#       Wrong or too restrictive umask will prevent Buildroot and packages from
+#       creating files and directories.
+#  2- Absolute canonical CWD (i.e. $(CURDIR)):
+#       Otherwise, some packages will use CWD as-is, others will compute its
+#       absolute canonical path. This makes harder tracking and fixing host
+#       machine path leaks.
+#  3- Absolute canonical output location (i.e. $(O)):
+#       For the same reason as the one for CWD.
+
+# Remove the trailing '/.' from $(O) as it can be added by the makefile wrapper
+# installed in the $(O) directory.
+# Also remove the trailing '/' the user can set when on the command line.
+override O := $(patsubst %/,%,$(patsubst %.,%,$(O)))
+# Make sure $(O) actually exists before calling realpath on it; this is to
+# avoid empty CANONICAL_O in case on non-existing entry.
+CANONICAL_O := $(shell mkdir -p $(O) >/dev/null 2>&1)$(realpath $(O))
+
+CANONICAL_CURDIR = $(realpath $(CURDIR))
+
+REQ_UMASK = 0022
+
+# Make sure O= is passed (with its absolute canonical path) everywhere the
+# toplevel makefile is called back.
+EXTRAMAKEARGS := O=$(CANONICAL_O)
+
+# Check Buildroot execution pre-requisites here.
+ifneq ($(shell umask):$(CURDIR):$(O),$(REQ_UMASK):$(CANONICAL_CURDIR):$(CANONICAL_O))
 .PHONY: _all $(MAKECMDGOALS)
 
 $(MAKECMDGOALS): _all
 	@:
 
 _all:
-	@umask $(UMASK) && $(MAKE) --no-print-directory $(MAKECMDGOALS)
+	@umask $(REQ_UMASK) && \
+		$(MAKE) -C $(CANONICAL_CURDIR) --no-print-directory \
+			$(MAKECMDGOALS) $(EXTRAMAKEARGS)
 
-else # umask
+else # umask / $(CURDIR) / $(O)
 
 # This is our default rule, so must come first
 all:
 
 # Set and export the version string
-export BR2_VERSION := 2016.11-git
+export BR2_VERSION := 2016.11-rc1
 
 # Save running make version since it's clobbered by the make package
 RUNNING_MAKE_VERSION := $(MAKE_VERSION)
@@ -106,28 +146,23 @@ else ifneq ($(filter-out $(nobuild_targets),$(MAKECMDGOALS)),)
 BR_BUILDING = y
 endif
 
+# We call make recursively to build packages. The command-line overrides that
+# are passed to Buildroot don't apply to those package build systems. In
+# particular, we don't want to pass down the O=<dir> option for out-of-tree
+# builds, because the value specified on the command line will not be correct
+# for packages.
+MAKEOVERRIDES :=
+
 # Include some helper macros and variables
 include support/misc/utils.mk
 
-ifneq ("$(origin O)", "command line")
-O := output
-CONFIG_DIR := $(TOPDIR)
+# Set variables related to in-tree or out-of-tree build.
+# Here, both $(O) and $(CURDIR) are absolute canonical paths.
+ifeq ($(O),$(CURDIR)/output)
+CONFIG_DIR := $(CURDIR)
 NEED_WRAPPER =
 else
-# other packages might also support Linux-style out of tree builds
-# with the O=<dir> syntax (E.G. BusyBox does). As make automatically
-# forwards command line variable definitions those packages get very
-# confused. Fix this by telling make to not do so
-MAKEOVERRIDES =
-# strangely enough O is still passed to submakes with MAKEOVERRIDES
-# (with make 3.81 atleast), the only thing that changes is the output
-# of the origin function (command line -> environment).
-# Unfortunately some packages don't look at origin (E.G. uClibc 0.9.31+)
-# To really make O go away, we have to override it.
-override O := $(O)
 CONFIG_DIR := $(O)
-# we need to pass O= everywhere we call back into the toplevel makefile
-EXTRAMAKEARGS = O=$(O)
 NEED_WRAPPER = y
 endif
 
@@ -143,28 +178,19 @@ $(if $(BASE_DIR),, $(error output directory "$(O)" does not exist))
 # Handling of BR2_EXTERNAL.
 #
 # The value of BR2_EXTERNAL is stored in .br-external in the output directory.
-# On subsequent invocations of make, it is read in. It can still be overridden
-# on the command line, therefore the file is re-created every time make is run.
-#
-# When BR2_EXTERNAL is set to an empty value (e.g. explicitly in command
-# line), the .br-external file is removed and we point to
-# support/dummy-external. This makes sure we can unconditionally include the
-# Config.in and external.mk from the BR2_EXTERNAL directory. In this case,
-# override is necessary so the user can clear BR2_EXTERNAL from the command
-# line, but the dummy path is still used internally.
+# The location of the external.mk makefile fragments is computed in that file.
+# On subsequent invocations of make, this file is read in. BR2_EXTERNAL can
+# still be overridden on the command line, therefore the file is re-created
+# every time make is run.
 
-BR2_EXTERNAL_FILE = $(BASE_DIR)/.br-external
+BR2_EXTERNAL_FILE = $(BASE_DIR)/.br-external.mk
 -include $(BR2_EXTERNAL_FILE)
-ifeq ($(BR2_EXTERNAL),)
-  override BR2_EXTERNAL = support/dummy-external
-  $(shell rm -f $(BR2_EXTERNAL_FILE))
-else
-  _BR2_EXTERNAL = $(shell cd $(BR2_EXTERNAL) >/dev/null 2>&1 && pwd)
-  ifeq ($(_BR2_EXTERNAL),)
-    $(error BR2_EXTERNAL='$(BR2_EXTERNAL)' does not exist, relative to $(TOPDIR))
-  endif
-  override BR2_EXTERNAL := $(_BR2_EXTERNAL)
-  $(shell echo BR2_EXTERNAL ?= $(BR2_EXTERNAL) > $(BR2_EXTERNAL_FILE))
+$(shell support/scripts/br2-external \
+	-m -o '$(BR2_EXTERNAL_FILE)' $(BR2_EXTERNAL))
+BR2_EXTERNAL_ERROR =
+include $(BR2_EXTERNAL_FILE)
+ifneq ($(BR2_EXTERNAL_ERROR),)
+$(error $(BR2_EXTERNAL_ERROR))
 endif
 
 # To make sure that the environment variable overrides the .config option,
@@ -195,8 +221,6 @@ LICENSE_FILES_DIR_TARGET = $(LEGAL_INFO_DIR)/licenses
 LICENSE_FILES_DIR_HOST = $(LEGAL_INFO_DIR)/host-licenses
 LEGAL_MANIFEST_CSV_TARGET = $(LEGAL_INFO_DIR)/manifest.csv
 LEGAL_MANIFEST_CSV_HOST = $(LEGAL_INFO_DIR)/host-manifest.csv
-LEGAL_LICENSES_TXT_TARGET = $(LEGAL_INFO_DIR)/licenses.txt
-LEGAL_LICENSES_TXT_HOST = $(LEGAL_INFO_DIR)/host-licenses.txt
 LEGAL_WARNINGS = $(LEGAL_INFO_DIR)/.warnings
 LEGAL_REPORT = $(LEGAL_INFO_DIR)/README
 
@@ -438,9 +462,7 @@ all: world
 
 # Include legacy before the other things, because package .mk files
 # may rely on it.
-ifneq ($(BR2_DEPRECATED),y)
 include Makefile.legacy
-endif
 
 include package/Makefile.in
 include support/dependencies/dependencies.mk
@@ -461,7 +483,15 @@ include boot/common.mk
 include linux/linux.mk
 include fs/common.mk
 
-include $(BR2_EXTERNAL)/external.mk
+# If using a br2-external tree, the BR2_EXTERNAL_$(NAME)_PATH variables
+# are also present in the .config file. Since .config is included after
+# we defined them in the Makefile, the values for those variables are
+# quoted. We just include the generated Makefile fragment .br2-external.mk
+# a third time, which will set those variables to the un-quoted values.
+include $(BR2_EXTERNAL_FILE)
+
+# Nothing to include if no BR2_EXTERNAL tree in use
+include $(BR2_EXTERNAL_MKS)
 
 # Now we are sure we have all the packages scanned and defined. We now
 # check for each package in the list of enabled packages, that all its
@@ -729,7 +759,7 @@ graph-depends: graph-depends-requirements
 	@$(INSTALL) -d $(GRAPHS_DIR)
 	@cd "$(CONFIG_DIR)"; \
 	$(TOPDIR)/support/scripts/graph-depends $(BR2_GRAPH_DEPS_OPTS) \
-		-o $(GRAPHS_DIR)/$(@).dot
+		--direct -o $(GRAPHS_DIR)/$(@).dot
 	dot $(BR2_GRAPH_DOT_OPTS) -T$(BR_GRAPH_OUT) \
 		-o $(GRAPHS_DIR)/$(@).$(BR_GRAPH_OUT) \
 		$(GRAPHS_DIR)/$(@).dot
@@ -775,7 +805,6 @@ COMMON_CONFIG_ENV = \
 	KCONFIG_AUTOHEADER=$(BUILD_DIR)/buildroot-config/autoconf.h \
 	KCONFIG_TRISTATE=$(BUILD_DIR)/buildroot-config/tristate.config \
 	BR2_CONFIG=$(BR2_CONFIG) \
-	BR2_EXTERNAL=$(BR2_EXTERNAL) \
 	HOST_GCC_VERSION="$(HOSTCC_VERSION)" \
 	BUILD_DIR=$(BUILD_DIR) \
 	SKIP_LEGACY=
@@ -854,7 +883,7 @@ define percent_defconfig
 	@$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
 		$$< --defconfig=$(1)/configs/$$@ $$(CONFIG_CONFIG_IN)
 endef
-$(eval $(foreach d,$(TOPDIR) $(BR2_EXTERNAL),$(call percent_defconfig,$(d))$(sep)))
+$(eval $(foreach d,$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)),$(call percent_defconfig,$(d))$(sep)))
 
 savedefconfig: $(BUILD_DIR)/buildroot-config/conf prepare-kconfig
 	@$(COMMON_CONFIG_ENV) $< \
@@ -883,7 +912,7 @@ endif
 # value of BR2_EXTERNAL is changed.
 .PHONY: $(BUILD_DIR)/.br2-external.in
 $(BUILD_DIR)/.br2-external.in: $(BUILD_DIR)
-	@touch $@
+	$(Q)support/scripts/br2-external -k -o "$(@)" $(BR2_EXTERNAL)
 
 # printvars prints all the variables currently defined in our
 # Makefiles. Alternatively, if a non-empty VARS variable is passed,
@@ -943,7 +972,10 @@ help:
 	@echo '  <pkg>-depends          - Build <pkg>'\''s dependencies'
 	@echo '  <pkg>-configure        - Build <pkg> up to the configure step'
 	@echo '  <pkg>-build            - Build <pkg> up to the build step'
+	@echo '  <pkg>-show-depends     - List packages on which <pkg> depends'
+	@echo '  <pkg>-show-rdepends    - List packages which have <pkg> as a dependency'
 	@echo '  <pkg>-graph-depends    - Generate a graph of <pkg>'\''s dependencies'
+	@echo '  <pkg>-graph-rdepends   - Generate a graph of <pkg>'\''s reverse dependencies'
 	@echo '  <pkg>-dirclean         - Remove <pkg> build directory'
 	@echo '  <pkg>-reconfigure      - Restart the build from the configure step'
 	@echo '  <pkg>-rebuild          - Restart the build from the build step'
@@ -977,17 +1009,34 @@ help:
 	@echo 'it on-line at http://buildroot.org/docs.html'
 	@echo
 
+# List the defconfig files
+# $(1): base directory
+# $(2): br2-external name, empty for bundled
+define list-defconfigs
+	@first=true; \
+	for defconfig in $(1)/configs/*_defconfig; do \
+		[ -f "$${defconfig}" ] || continue; \
+		if $${first}; then \
+			if [ "$(2)" ]; then \
+				printf 'External configs in "$(call qstrip,$(2))":\n'; \
+			else \
+				printf "Built-in configs:\n"; \
+			fi; \
+			first=false; \
+		fi; \
+		defconfig="$${defconfig##*/}"; \
+		printf "  %-35s - Build for %s\n" "$${defconfig}" "$${defconfig%_defconfig}"; \
+	done; \
+	$${first} || printf "\n"
+endef
+
+# We iterate over BR2_EXTERNAL_NAMES rather than BR2_EXTERNAL_DIRS,
+# because we want to display the name of the br2-external tree.
 list-defconfigs:
-	@echo 'Built-in configs:'
-	@$(foreach b, $(sort $(notdir $(wildcard $(TOPDIR)/configs/*_defconfig))), \
-	  printf "  %-35s - Build for %s\\n" $(b) $(b:_defconfig=);)
-ifneq ($(wildcard $(BR2_EXTERNAL)/configs/*_defconfig),)
-	@echo
-	@echo 'User-provided configs:'
-	@$(foreach b, $(sort $(notdir $(wildcard $(BR2_EXTERNAL)/configs/*_defconfig))), \
-	  printf "  %-35s - Build for %s\\n" $(b) $(b:_defconfig=);)
-endif
-	@echo
+	$(call list-defconfigs,$(TOPDIR))
+	$(foreach name,$(BR2_EXTERNAL_NAMES),\
+		$(call list-defconfigs,$(BR2_EXTERNAL_$(name)_PATH),\
+			$(BR2_EXTERNAL_$(name)_DESC))$(sep))
 
 release: OUT = buildroot-$(BR2_VERSION)
 
@@ -1006,8 +1055,8 @@ print-version:
 	@echo $(BR2_VERSION_FULL)
 
 include docs/manual/manual.mk
--include $(BR2_EXTERNAL)/docs/*/*.mk
+-include $(foreach dir,$(BR2_EXTERNAL_DIRS),$(dir)/docs/*/*.mk)
 
 .PHONY: $(noconfig_targets)
 
-endif #umask
+endif #umask / $(CURDIR) / $(O)

@@ -253,6 +253,8 @@ F:	package/tor/
 F:	package/transmission/
 F:	package/tvheadend/
 F:	package/unixodbc/
+F:	package/vdr/
+F:	package/vdr-plugin-vnsiserver/
 F:	package/vlc/
 F:	package/vnstat/
 F:	package/x11r7/
@@ -385,6 +387,12 @@ F:	package/openldap/
 N:	David du Colombier <0intro@gmail.com>
 F:	package/x264/
 
+N:	David Lechner <david@lechnology.com>
+F:	board/lego/ev3/
+F:	configs/lego_ev3_defconfig
+F:	linux/linux-ext-ev3dev-linux-drivers.mk
+F:	package/ev3dev-linux-drivers/
+
 N:	Davide Viti <zinosat@tiscali.it>
 F:	package/flann/
 F:	package/python-paho-mqtt/
@@ -454,6 +462,7 @@ F:	board/warp7/
 F:	configs/freescale_imx*
 F:	configs/imx6ulpico_defconfig
 F:	configs/mx6cubox_defconfig
+F:	configs/mx6udoo_defconfig
 F:	configs/warp7_defconfig
 
 N:	Fabio Porcedda <fabio.porcedda@gmail.com>
@@ -518,7 +527,9 @@ N:	Frank Hunleth <fhunleth@troodon-software.com>
 F:	package/am335x-pru-package/
 F:	package/libdmtx/
 F:	package/libsodium/
+F:	package/php-amqp/
 F:	package/python-cherrypy/
+F:	package/rabbitmq-server/
 F:	package/sane-backends/
 F:	package/ucl/
 F:	package/upx/
@@ -530,7 +541,9 @@ F:	configs/nitrogen*
 F:	package/freescale-imx/
 F:	package/gstreamer1/gst1-imx/
 F:	package/libimxvpuapi/
+F:	package/mfgtools/
 F:	package/sshpass/
+F:	package/x11r7/xdriver_xf86-video-imx-viv/
 
 N:	Geoff Levand <geoff@infradead.org>
 F:	package/flannel/
@@ -714,9 +727,9 @@ F:	package/vorbis-tools/
 F:	package/wavpack/
 F:	package/wayland-protocols/
 F:	package/webkitgtk/
-F:	package/webkitgtk24/
 F:	package/whois/
 F:	package/wireshark/
+F:	package/wpa_supplicant/
 F:	package/wpan-tools/
 F:	package/x11r7/xdriver_xf86-video-qxl/
 F:	package/xtables-addons/
@@ -1098,6 +1111,9 @@ N:	Oli Vogt <oli.vogt.pub01@gmail.com>
 F:	package/python-django/
 F:	package/python-flup/
 
+N:	Olivier Matz <olivier.matz@6wind.com>
+F:	package/python-pyelftools/
+
 N:	Olivier Schonken <olivier.schonken@gmail.com>
 F:	package/ijs/
 F:	package/poppler/
@@ -1143,7 +1159,6 @@ F:	package/python-ipaddr/
 F:	package/python-pam/
 F:	package/python-psutil/
 F:	package/triggerhappy/
-F:	package/wpa_supplicant/
 
 N:	Peter Seiderer <ps.report@gmx.net>
 F:	board/raspberrypi/
@@ -1183,7 +1198,12 @@ F:	package/libassuan/
 F:	package/libgpgme/
 
 N:	Philippe Proulx <eeppeliteloop@gmail.com>
+F:	package/lttng-babeltrace/
+F:	package/lttng-libust/
+F:	package/lttng-modules/
+F:	package/lttng-tools/
 F:	package/python-ipython/
+F:	package/liburcu/
 
 N:	Pierre Floury <pierre.floury@gmail.com>
 F:	package/trace-cmd/
@@ -1209,6 +1229,10 @@ F:	package/gssdp/
 F:	package/gupnp/
 F:	package/gupnp-av/
 
+N:	Rahul Jain <rahul.jain@imgtec.com>
+F:	package/uhttpd/
+F:	package/ustream-ssl/
+
 N:	Renaud Aubin <root@renaud.io>
 F:	package/libhttpparser/
 
@@ -1218,10 +1242,8 @@ F:	package/atop/
 N:	Rhys Williams <github@wilberforce.co.nz>
 F:	package/lirc-tools/
 
-N:	Richard Braun <rbraun@>
-F:	package/curlftpfs/
-
 N:	Richard Braun <rbraun@sceen.net>
+F:	package/curlftpfs/
 F:	package/tzdata/
 
 N:	Rico Bachmann <bachmann@tofwerk.com>
@@ -1259,6 +1281,10 @@ F:	package/python-pysnmp-apps/
 F:	package/python-pysnmp-mibs/
 F:	package/python-tornado/
 
+N:	Ryan Coe <bluemrp9@gmail.com>
+F:	package/inadyn/
+F:	package/libite/
+
 N:	Ryan Wilkins <ryan@deadfrog.net>
 F:	package/biosdevname/
 
@@ -1274,6 +1300,7 @@ F:	package/qdecoder/
 F:	package/qlibc/
 
 N:	Sam Bobroff <sam.bobroff@au1.ibm.com>
+F:	arch/Config.in.powerpc
 F:	package/librtas/
 
 N:	Samuel Martin <s.martin49@gmail.com>
@@ -1345,8 +1372,6 @@ F:	package/sconeserver/
 F:	package/sound-theme-borealis/
 F:	package/sound-theme-freedesktop/
 F:	package/vlc/
-F:	package/wvdial/
-F:	package/wvstreams/
 F:	package/xscreensaver/
 F:	package/zmqpp/
 F:	package/zyre/
@@ -1447,8 +1472,7 @@ F:	package/cmake/
 F:	package/cramfs/
 F:	package/dmidecode/
 F:	package/flashrom/
-F:	package/gcc/gcc-final/
-F:	package/gcc/gcc-initial/
+F:	package/gcc/
 F:	package/genext2fs/
 F:	package/genromfs/
 F:	package/getent/
@@ -1461,15 +1485,10 @@ F:	package/libcap/
 F:	package/libffi/
 F:	package/libsha1/
 F:	package/libtirpc/
-F:	package/liburcu/
 F:	package/libxkbcommon/
 F:	package/libxml-parser-perl/
 F:	package/localedef/
 F:	package/log4cxx/
-F:	package/lttng-babeltrace/
-F:	package/lttng-libust/
-F:	package/lttng-modules/
-F:	package/lttng-tools/
 F:	package/monit/
 F:	package/mpdecimal/
 F:	package/msmtp/
@@ -1582,6 +1601,7 @@ F:	package/libedit/
 F:	package/libinput/
 F:	package/libiscsi/
 F:	package/libseccomp/
+F:	package/linux-tools/
 F:	package/mesa3d-headers/
 F:	package/mke2img/
 F:	package/nut/
@@ -1593,11 +1613,15 @@ F:	package/slirp/
 F:	package/snappy/
 F:	package/spice/
 F:	package/spice-protocol/
+F:	package/systemd/
+F:	package/systemd-bootchart/
 F:	package/tmux/
 F:	package/tvheadend/
 F:	package/usbredir/
 F:	package/vde2/
 F:	package/w_scan/
+F:	package/wayland/
+F:	package/weston/
 F:	support/download/
 
 N:	Yegor Yefremov <yegorslists@googlemail.com>

@@ -133,6 +133,10 @@ ifeq ($(BR2_TARGET_UBOOT_NEEDS_DTC),y)
 UBOOT_DEPENDENCIES += host-dtc
 endif
 
+ifeq ($(BR2_TARGET_UBOOT_NEEDS_OPENSSL),y)
+UBOOT_DEPENDENCIES += host-openssl
+endif
+
 # prior to u-boot 2013.10 the license info was in COPYING. Copy it so
 # legal-info finds it
 define UBOOT_COPY_OLD_LICENSE_FILE
@@ -177,6 +181,12 @@ endif # BR2_TARGET_UBOOT_USE_DEFCONFIG
 
 UBOOT_KCONFIG_EDITORS = menuconfig xconfig gconfig nconfig
 UBOOT_KCONFIG_OPTS = $(UBOOT_MAKE_OPTS)
+define UBOOT_HELP_CMDS
+	@echo '  uboot-menuconfig       - Run U-Boot menuconfig'
+	@echo '  uboot-savedefconfig    - Run U-Boot savedefconfig'
+	@echo '  uboot-update-defconfig - Save the U-Boot configuration to the path specified'
+	@echo '                             by BR2_TARGET_UBOOT_CUSTOM_CONFIG_FILE'
+endef
 endif # BR2_TARGET_UBOOT_BUILD_SYSTEM_LEGACY
 
 define UBOOT_BUILD_CMDS

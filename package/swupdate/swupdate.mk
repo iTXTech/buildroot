@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-SWUPDATE_VERSION = 2016.07
+SWUPDATE_VERSION = 2016.10
 SWUPDATE_SITE = $(call github,sbabic,swupdate,$(SWUPDATE_VERSION))
 SWUPDATE_LICENSE = GPLv2+, MIT, Public Domain
 SWUPDATE_LICENSE_FILES = COPYING
@@ -39,8 +39,8 @@ else
 SWUPDATE_MAKE_ENV += HAVE_LIBCURL=n
 endif
 
-ifeq ($(BR2_PACKAGE_LUA),y)
-SWUPDATE_DEPENDENCIES += lua host-pkgconf
+ifeq ($(BR2_PACKAGE_HAS_LUAINTERPRETER),y)
+SWUPDATE_DEPENDENCIES += luainterpreter host-pkgconf
 SWUPDATE_MAKE_ENV += HAVE_LUA=y
 else
 SWUPDATE_MAKE_ENV += HAVE_LUA=n

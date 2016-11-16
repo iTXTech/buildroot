@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-PHP_VERSION = 7.0.12
+PHP_VERSION = 7.0.13
 PHP_SITE = http://www.php.net/distributions
 PHP_SOURCE = php-$(PHP_VERSION).tar.xz
 PHP_INSTALL_STAGING = YES
@@ -81,9 +81,9 @@ ifeq ($(BR2_PACKAGE_PHP_ZTS),y)
 PHP_CONF_OPTS += --enable-maintainer-zts
 PHP_EXTRA_LIBS += -lpthread
 endif
-PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_CLI),,--disable-cli)
-PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_CGI),,--disable-cgi)
-PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_FPM),--enable-fpm,--disable-fpm)
+PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_SAPI_CLI),--enable-cli,--disable-cli)
+PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_SAPI_CGI),--enable-cgi,--disable-cgi)
+PHP_CONF_OPTS += $(if $(BR2_PACKAGE_PHP_SAPI_FPM),--enable-fpm,--disable-fpm)
 
 ### Extensions
 PHP_CONF_OPTS += \
@@ -324,7 +324,7 @@ endef
 PHP_PRE_CONFIGURE_HOOKS := WEAKREF_UNPACK $(PHP_PRE_CONFIGURE_HOOKS)
 endif
 
-ifeq ($(BR2_PACKAGE_PHP_FPM),y)
+ifeq ($(BR2_PACKAGE_PHP_SAPI_FPM),y)
 define PHP_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 0755 $(@D)/sapi/fpm/init.d.php-fpm \
 		$(TARGET_DIR)/etc/init.d/S49php-fpm

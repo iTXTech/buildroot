@@ -41,19 +41,19 @@ AUFS_UTIL_POST_PATCH_HOOKS += AUFS_UTIL_REMOVE_RDU64
 
 # First, we build the host tools, needed to build the target tools.
 define AUFS_UTIL_BUILD_CMDS
-	$(MAKE) -C $(@D) \
+	$(HOST_MAKE_ENV) $(MAKE) -C $(@D) \
 		$(HOST_CONFIGURE_OPTS) \
 		CPPFLAGS="$(AUFS_UTIL_HOST_CPPFLAGS)" \
 		HOSTCC="$(HOSTCC)" HOSTLD="$(HOSTLD)" \
 		INSTALL="$(INSTALL)" c2sh c2tmac
-	$(MAKE1) -C $(@D) \
+	$(TARGET_MAKE_ENV) $(MAKE1) -C $(@D) \
 		$(TARGET_CONFIGURE_OPTS) \
 		CPPFLAGS="$(AUFS_UTIL_CPPFLAGS)" \
 		INSTALL="$(INSTALL)" all
 endef
 
 define AUFS_UTIL_INSTALL_TARGET_CMDS
-	$(MAKE) -C $(@D) INSTALL="$(INSTALL)" DESTDIR="$(TARGET_DIR)" install
+	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) INSTALL="$(INSTALL)" DESTDIR="$(TARGET_DIR)" install
 endef
 
 $(eval $(generic-package))
