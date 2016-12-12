@@ -17,15 +17,12 @@ choice
 
 	config BR2_BINUTILS_VERSION_2_27_X
 		bool "binutils 2.27"
-		# supported but broken on Microblaze
-		# see https://sourceware.org/bugzilla/show_bug.cgi?id=20748
-		depends on !BR2_microblaze
 
 endchoice
 
 config BR2_BINUTILS_VERSION
 	string
-	default "arc-2016.09-eng015"	if BR2_arc
+	default "arc-2016.09-rc2"	if BR2_arc
 	default "2.25.1"	if BR2_BINUTILS_VERSION_2_25_X
 	default "2.26.1"	if BR2_BINUTILS_VERSION_2_26_X
 	default "2.27"		if BR2_BINUTILS_VERSION_2_27_X

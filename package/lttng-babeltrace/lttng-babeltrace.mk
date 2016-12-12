@@ -5,7 +5,7 @@
 ################################################################################
 
 LTTNG_BABELTRACE_SITE = http://www.efficios.com/files/babeltrace
-LTTNG_BABELTRACE_VERSION = 1.4.0
+LTTNG_BABELTRACE_VERSION = 1.5.0
 LTTNG_BABELTRACE_SOURCE = babeltrace-$(LTTNG_BABELTRACE_VERSION).tar.bz2
 LTTNG_BABELTRACE_LICENSE = MIT, LGPLv2.1 (include/babeltrace/list.h), GPLv2 (test code)
 LTTNG_BABELTRACE_LICENSE_FILES = mit-license.txt gpl-2.0.txt LICENSE
@@ -14,7 +14,7 @@ HOST_LTTNG_BABELTRACE_DEPENDENCIES = \
 	host-popt host-util-linux host-libglib2 host-pkgconf
 HOST_LTTNG_BABELTRACE_CONF_OPTS += --disable-debug-info
 
-# For 0002-m4-ax_lib_elfutils.m4-add-cache-variable.patch
+# For: 0002-m4-ax_lib_elfutils.m4-add-cache-variable.patch
 LTTNG_BABELTRACE_AUTORECONF = YES
 
 ifeq ($(BR2_PACKAGE_ELFUTILS),y)

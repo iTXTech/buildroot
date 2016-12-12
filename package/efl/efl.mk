@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-EFL_VERSION = 1.18.2
+EFL_VERSION = 1.18.4
 EFL_SOURCE = efl-$(EFL_VERSION).tar.xz
 EFL_SITE = http://download.enlightenment.org/rel/libs/efl
 EFL_LICENSE = BSD-2c, LGPLv2.1+, GPLv2+
@@ -20,7 +20,7 @@ EFL_LICENSE_FILES = \
 EFL_INSTALL_STAGING = YES
 
 EFL_DEPENDENCIES = host-pkgconf host-efl host-luajit dbus freetype \
-	jpeg luajit udev util-linux zlib
+	jpeg luajit lz4 udev util-linux zlib
 
 # Configure options:
 # --disable-lua-old: build elua for the target.
@@ -28,6 +28,7 @@ EFL_DEPENDENCIES = host-pkgconf host-efl host-luajit dbus freetype \
 # --disable-sdl: disable sdl2 support.
 # --disable-spectre: disable spectre image loader.
 # --disable-xinput22: disable X11 XInput v2.2+ support.
+# --enable-liblz4: use liblz4 from lz4 package.
 # --with-doxygen: disable doxygen documentation
 EFL_CONF_OPTS = \
 	--with-edje-cc=$(HOST_DIR)/usr/bin/edje_cc \
@@ -42,6 +43,8 @@ EFL_CONF_OPTS = \
 	--disable-sdl \
 	--disable-spectre \
 	--disable-xinput22 \
+	--disable-wayland \
+	--enable-liblz4 \
 	--with-doxygen=no
 
 # Disable untested configuration warning.
@@ -144,13 +147,6 @@ EFL_CONF_OPTS += --with-crypto=gnutls \
 else
 EFL_CONF_OPTS += --with-crypto=none
 endif # BR2_PACKAGE_OPENSSL
-
-ifeq ($(BR2_PACKAGE_WAYLAND),y)
-EFL_DEPENDENCIES += wayland libxkbcommon
-EFL_CONF_OPTS += --enable-wayland
-else
-EFL_CONF_OPTS += --disable-wayland
-endif
 
 ifeq ($(BR2_PACKAGE_EFL_ELPUT),y)
 EFL_CONF_OPTS += --enable-elput

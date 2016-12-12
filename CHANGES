@@ -1,3 +1,75 @@
+2016.11, Released November 30th, 2016
+
+	Minor fixes.
+
+	Updated/fixed packages: bzip2, gcc, jasper, sane-backends,
+	uboot, uclibc
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9451: packages/postgresql/postgresql.mk contains wrong POST...
+
+2016.11-rc3, Released November 28th, 2016
+
+	Fixes all over the tree, including a number of security fixes.
+
+	The move from fakeroot to pseudo unfortunately brought a
+	number of issues.  The SELinux issue described in #9386 which
+	triggered the move to pseudo has been investigated further and
+	a workaround implemented and the pseudo changes reverted.
+
+	Linux kernel: update default to 4.8.11.
+
+	Defconfigs: Updates/fixes for imx28ek, mx6udoo, imx6ulpico,
+	olimex a20 olinuxino lime mali, roseapplepi, synopsis aarch64
+	vdk, axs101, axs103 and hs38 smd vdk.
+
+	Updated/fixed packages: autossh, chrony, dosfstools,
+	dtv-scan-tables, e2fsprogs, gcc, gdb, gnuchess, gnuradio,
+	gpsd, gst1-plugins-bad, gst1-plugins-good, imagemagick,
+	kvm-unit-tests, libfribi, libuv, mesa3d, mpfr, mplayer, mpv,
+	ntp, ola, olsr, openblas, openjpeg, openssh, postgresql,
+	ptpd2python3, qemu, qextserialport, qt5base, quagga, xqwt,
+	taskd, tiff, tremor, trousers, udisks, uclibc, wireshark,
+	xapp_xload, xenomai, xmlstarlet
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9386: ubinize fails with or without custom config
+	#9431: A misspelling
+	#9446: make raspberrypi3_defconfig compilation failure
+
+2016.11-rc2, Released November 13th, 2016
+
+	Fixes all over the tree.
+
+	Architecture: add support for MIPS XBurst cores; remove MIPS
+	support for M5100 cores.
+
+	Updated/fixed packages: mesa3d, lttng-babeltrace, tinyalsa, pseudo,
+	czmq, libxml2, makedevs, binutils, kvm-unit-tests, libnss, privoxy,
+	qemu, ser2net, net-tools, ffmpeg, assimp, libmpeg2, ccache, mpv,
+	libxslt, python, python3, php, valgrind, guile, domoticz, efl,
+	jasper, kvmtool, go, wget, sane-backends, weston, tinymembench,
+	strace, openjpeg, lcms2, quota.
+
+	Linux kernel: update default to 4.8.7.
+
+	CMake support: fix cmake wrapper to properly pass NDEBUG flag.
+
+	Filesystems: use a wrapper to pseudo, to better mimick the behaviour
+	of fakeroot; makedevs no longer breaks of the destination already
+	exists and is of the correct type/major/minor.
+
+	Defconfigs: a few legacy and broken defconfigs have been removed
+	because they now fail to build: kb9202_defconfig, mini2440_defconfig,
+	freescale_p2020ds, qmx6, calao*, atmel_sama5d4ek. Other defconfigs
+	have been updated: nanopi-neo, olimex_a20_olinuxino_lime_mali,
+	armadeus_apf51, armadeus_apf28, freescale_imx31_3stack, ci20,
+	olimex_a20_olinuxino_lime2, atmel_at91sam9260eknf,
+	atmel_at91sam9rlek, atmel_at91sam9g20dfc, atmel_at91sam9g45m10ek,
+	atmel_sama5d3xek.
+
 2016.11-rc1, Released November 3rd, 2016
 
 	Fixes all over the tree and new features.
